@@ -11,10 +11,14 @@ type conn struct {
 	w io.Writer
 }
 
+//example:
 // func handleConn(conn net.Conn) {
+//	var buf []byte = make([]byte, 1024)
 //	var rate int64 = 10000
 // 	conn = ConnWithRateLimit(conn, rate)
 // 	conn.Read(buf)
+//	......
+// 	conn.Write(buf)
 // }
 
 func ConnWithRateLimit(conn net.Conn, rate int64) net.Conn {
@@ -24,10 +28,10 @@ func ConnWithRateLimit(conn net.Conn, rate int64) net.Conn {
 	cap := rate / 10 //默认有十分之一的capacity
 	rb := NewBucketWithRate(float64(rate), cap)
 	wb := NewBucketWithRate(float64(rate), cap)
-	return ConnWithRate(conn, rb, wb)
+	return ConnWithRateBucket(conn, rb, wb)
 }
 
-func ConnWithRate(c net.Conn, rb, wb *Bucket) net.Conn {
+func ConnWithRateBucket(c net.Conn, rb, wb *Bucket) net.Conn {
 	conn := &conn{Conn: c}
 	if rb != nil {
 		conn.r = Reader(c, rb)
